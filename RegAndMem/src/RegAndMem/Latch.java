@@ -1,3 +1,5 @@
+package RegAndMem;
+
 public class Latch {
     private boolean output;
     public Latch() {

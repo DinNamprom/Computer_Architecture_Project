@@ -1,3 +1,5 @@
+package RegAndMem;
+
 public class OneByteMem {
     private Latch[] output;
     public OneByteMem() {

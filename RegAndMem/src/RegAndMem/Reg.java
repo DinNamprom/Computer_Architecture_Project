@@ -1,3 +1,5 @@
+package RegAndMem;
+
 public class Reg {
     private OneByteMem[][] data;
     private final int size = 8;

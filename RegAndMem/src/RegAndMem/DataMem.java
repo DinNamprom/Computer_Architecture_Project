@@ -1,3 +1,5 @@
+package RegAndMem;
+
 public class DataMem {
     private OneByteMem[][] mem;
     private final int size = 16;

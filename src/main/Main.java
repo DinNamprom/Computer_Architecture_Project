@@ -9,11 +9,7 @@ public class Main {
     // Indexes into the fields array filled by readAndParse
     static final int LABEL = 0, OPCODE = 1, ARG0 = 2, ARG1 = 3, ARG2 = 4;
 
-    public static void main(String[] args) {
-        // if (args.length != 2) {
-        //     System.out.println("error: usage: java Assembler <assembly-code-file> <machine-code-file>");
-        //     System.exit(1);
-        // }
+    static void main() {
 
         String inFileString = "D:\\Com Arc\\Proj\\src\\main\\assembly-code-file";
         String outFileString = "D:\\Com Arc\\Proj\\src\\main\\machine-code-file";

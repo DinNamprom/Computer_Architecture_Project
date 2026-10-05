@@ -1,65 +1,81 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public class Simulator {
 
     public static void main(String[] args) {
-        //สร้าง Object state
-        StateType state = new StateType();
+        if (args.length > 1) {
+            System.err.println("Usage: java Simulator [machine-code file]");
+            System.exit(1);
+            return;
+        }
 
-        //โหลดคำสั่งเข้าหน่วยความจำ
         try {
-            File file = new File("machine_code.txt");
-            Scanner scanner = new Scanner(file);
+            // รับ path จาก args หรือใช้ชื่อไฟล์เดิม
+            Path path = Path.of(args.length == 1 ? args[0] : "machine_code.txt");
+            StateType state = new StateType();
+            MachineCodeLoader.load(path, state);
+            int instructionCount = simulate(state);
 
-            while (scanner.hasNextInt()) {
-                state.mem[state.numMemory] = scanner.nextInt();
-                state.numMemory++; // ต้องเท่ากับจำนวนบรรทัดใน machine-code file
-            }
-            scanner.close();
-        } catch (FileNotFoundException e) {
-            System.out.println("Error opening file");
-            System.exit(1); // Call exit Error
-        }
-
-        int opcode;
-
-
-        //Fetch Instruction, อัปเดต PC และเชื่อมต่อระบบแสดงผล
-        while (true) {
-            // เรียก 1 ครั้ง ก่อน instruction executes
+            System.out.println("machine halted");
+            System.out.printf("total of %d instructions executed\n", instructionCount);
+            System.out.println("final state of machine:");
             printState(state);
-
-            // 1. Fetch: ดึงคำสั่งจากตำแหน่ง PC ปัจจุบัน
-            int current_instruction = state.mem[state.pc];
-
-            // 2. Decode: แยก opcode ออกมา (bits 24-22)
-            opcode = (current_instruction >> 22) & 0x7;
-
-            // 3. PC Update: ขยับ PC ไปชี้บรรทัดถัดไปเสมอ
-            state.pc = state.pc + 1;
-
-            // 4. Execute: ตรวจสอบและรันคำสั่ง
-            if (opcode == 6) {
-                // คำสั่ง halt (opcode 110)
-                break; // ออกจาก loop เพื่อเตรียมจบโปรแกรม
-            }
-            else if (opcode == 7) {
-                // คำสั่ง noop (opcode 111) ไม่ทำอะไรเลย
-                continue;
-            }
-            // ... (เพื่อนที่จะทำ ALU จะมาเขียนคำสั่ง add, nand, lw, sw ต่อตรงนี้) ...
+        } catch (IOException e) {
+            System.err.println("Error reading machine-code file: " + e.getMessage());
+            System.exit(1);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            System.err.println("Error: " + e.getMessage());
+            System.exit(1);
         }
+    }
 
-        // เรียกอีก 1 ครั้ง ก่อน simulator exits
-        printState(state);
-        System.exit(0); // Call exit(0) ถ้าทำเสร็จโดยไม่มี errors
+    public static int simulate(StateType state) {
+        int instructionCount = 0;
+
+        while (true) {
+            int currentPC = state.pc;
+            if (currentPC < 0 || currentPC >= StateType.NUMMEMORY) {
+                throw new IllegalStateException("PC out of range: " + currentPC);
+            }
+
+            // แสดงสถานะก่อนรันแต่ละคำสั่ง
+            printState(state);
+            int instruction = state.mem[currentPC];
+            int opcode = InstructionDecoder.getOpcode(instruction);
+
+            // beq และ jalr จะเปลี่ยน nextPC ตรงส่วน execute
+            int nextPC = currentPC + 1;
+            if (opcode != InstructionDecoder.HALT && opcode != InstructionDecoder.NOOP) {
+                throw new IllegalStateException(
+                        "Opcode " + opcode + " is not connected yet (pc " + currentPC + ").");
+            }
+
+            state.pc = nextPC;
+            instructionCount++; // นับ noop และ halt ด้วย
+            if (opcode == InstructionDecoder.HALT) {
+                return instructionCount;
+            }
+        }
     }
 
     // พิมพ์สถานะของระบบ
     public static void printState(StateType state) {
-        // หมายเหตุ: ห้ามแก้ไข printState หรือ stateStruct ของเทมเพลตอาจารย์
-        // ใส่ลอจิกการ print memory, register, pc ตาม format ที่กำหนด
+
+        System.out.print("\n@@@\nstate:\n");
+        System.out.printf("\tpc %d\n", state.pc);
+        System.out.print("\tmemory:\n");
+
+        // แสดงเฉพาะ memory ที่โหลดมา
+        for (int i = 0; i < state.numMemory; i++) {
+            System.out.printf("\t\tmem[ %d ] %d\n", i, state.mem[i]);
+        }
+
+        System.out.print("\tregisters:\n");
+        // แสดง register ทั้ง 8 ตัว
+        for (int i = 0; i < StateType.NUMREGS; i++) {
+            System.out.printf("\t\treg[ %d ] %d\n", i, state.reg[i]);
+        }
+        System.out.print("end state\n");
     }
 }

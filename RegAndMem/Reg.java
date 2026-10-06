@@ -10,33 +10,35 @@ public class Reg {
         }
     }
 
-    public boolean[] get(boolean[] address) {
+    public int get(int address) {
         boolean[] output = new boolean[32];
-        int d_address = binary2decimal(address);
-        if (d_address >= size) System.out.println("Hardware Fault: Address OutOfRange");
+        if (address >= size) {
+            System.out.println("Hardware Fault: Address OutOfRange");
+            return -1;
+        }
         for (int i = 0; i < 4; i++) {
-            Latch[] latches = data[d_address][i].get();
+            Latch[] latches = data[address][i].get();
             for (int j = 0; j < 8; j++) output[i*8 + j] = latches[j].get();
         }
-        return output;
+        return binary2decimal(output);
     }
 
-    public void set(boolean[] address, boolean[] value) {
-        int d_address = binary2decimal(address);
-        if (d_address == 0) {
+    public void set(int address, int value) {
+        boolean[] b_value = decial2binary(value);
+        if (address == 0) {
             System.out.println("Reserve x0 for 0 value");
             return;
         }
-        if (d_address >= size) {
+        if (address >= size) {
             System.out.println("Hardware Fault: Address OutOfRange");
             return;
         }
         boolean[] s_data = new boolean[32];
-        for (int i = 0; i < value.length; i++) s_data[31 - i] = value[value.length - i - 1];
+        for (int i = 0; i < b_value.length; i++) s_data[31 - i] = b_value[b_value.length - i - 1];
         for (int i = 0; i < 4; i++) {
             boolean[] byteChunk = new boolean[8];
             System.arraycopy(s_data, (i * 8), byteChunk, 0, 8);
-            data[d_address][i].set(byteChunk, true);
+            data[address][i].set(byteChunk, true);
         }
     }
 
@@ -48,12 +50,14 @@ public class Reg {
         return sum;
     }
 
-    private boolean[] decial2binary(int data, int size) {
-        boolean[] output = new boolean[size];
-        for (int i = 0; i < size; i++) {
-            int mask = 1 << (size - 1 - i);
+    private boolean[] decial2binary(int data) {
+        boolean[] output = new boolean[32];
+        for (int i = 0; i < 32; i++) {
+            int mask = 1 << (32 - 1 - i);
             output[i] = (data & mask) != 0;
         }
         return output;
     }
+
+
 }

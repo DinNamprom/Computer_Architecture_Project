@@ -1,21 +1,14 @@
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Scanner;
 import java.util.TreeMap;
 
 public class AssemblyReader {
-    static final int MAXLINELENGTH = 1000;
-
-    // Indexes into the fields array filled by readAndParse
-    static final int LABEL = 0, OPCODE = 1, ARG0 = 2, ARG1 = 3, ARG2 = 4;
-
     static void main() {
 
 
-        String inFileString = "assembly-code-file";
-        String outFileString = "machine-code-file";
+        String inFileString = "MachineCode_Converter/assembly-code-file";
+        String outFileString = "MachineCode_Converter/machine-code-file";
 
 
         Assembler.AsmReader in = null;

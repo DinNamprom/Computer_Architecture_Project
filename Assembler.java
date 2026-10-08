@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -6,7 +5,6 @@ import java.util.List;
 import static java.lang.System.exit;
 
 public class Assembler {
-
     static boolean readAndParse(AsmReader in, String[] fields) {
         Arrays.fill(fields, "");
 
@@ -15,7 +13,7 @@ public class Assembler {
             return false;
         }
 
-        if (line.length() >= Main.MAXLINELENGTH - 1) {
+        if (line.length() >= AssemblyReader.MAXLINELENGTH - 1) {
             System.out.println("error: line too long");
             exit(1);
         }
@@ -26,7 +24,7 @@ public class Assembler {
             while (end < line.length() && !Character.isWhitespace(line.charAt(end))) {
                 end++;
             }
-            fields[Main.LABEL] = line.substring(0, end);
+            fields[AssemblyReader.LABEL] = line.substring(0, end);
             rest = line.substring(end);
         }
 
@@ -34,7 +32,7 @@ public class Assembler {
         if (!trimmed.isEmpty()) {
             String[] tokens = trimmed.split("\\s+");
             for (int i = 0; i < 4 && i < tokens.length; i++) {
-                fields[Main.OPCODE + i] = tokens[i];
+                fields[AssemblyReader.OPCODE + i] = tokens[i];
             }
         }
         return true;
@@ -83,7 +81,7 @@ public class Assembler {
         for (Map.Entry<Integer, String[]> e : Assembly.entrySet()) {
             int lineNo = e.getKey();
             String[] f = e.getValue();
-            String op = f[Main.OPCODE];
+            String op = f[AssemblyReader.OPCODE];
 
             if (op.isEmpty()) {
                 continue;
@@ -102,7 +100,7 @@ public class Assembler {
             }
 
             if (op.equals(".fill")) {
-                String a0 = f[Main.ARG0];
+                String a0 = f[AssemblyReader.ARG0];
                 if (!isNumber(a0) && !c.labels.containsKey(a0)) {
                     System.out.println("error: line " + lineNo + ": undefined label " + a0);
                     return false;
@@ -121,7 +119,7 @@ public class Assembler {
             for (Map.Entry<Integer, String[]> e : Assembly.entrySet()) {
                 int lineNo = e.getKey();
                 String[] f = e.getValue();
-                String label = f[Main.LABEL];
+                String label = f[AssemblyReader.LABEL];
 
                 if (!label.isEmpty()) {
                     if (!label.matches("[A-Za-z][A-Za-z0-9]{0,5}")) {
@@ -136,7 +134,7 @@ public class Assembler {
                     }
                     labels.put(label, lineNo);
                 }
-                arg2.put(lineNo, f[Main.ARG2]);
+                arg2.put(lineNo, f[AssemblyReader.ARG2]);
             }
         }
     }
@@ -148,57 +146,57 @@ public class Assembler {
         ConvertMachineCode(TreeMap<Integer, String[]> assembly) {
             int addr = 0;
             for (String[] v : assembly.values()) {
-                if (v[Main.OPCODE].isEmpty()) {
+                if (v[AssemblyReader.OPCODE].isEmpty()) {
                     continue;
                 }
-                if (!v[Main.LABEL].isEmpty()) {
-                    addressOf.put(v[Main.LABEL], addr);
+                if (!v[AssemblyReader.LABEL].isEmpty()) {
+                    addressOf.put(v[AssemblyReader.LABEL], addr);
                 }
                 addr++;
             }
 
             int lineNo = 0;
             for (String[] v : assembly.values()) {
-                if (v[Main.OPCODE].isEmpty()) {
+                if (v[AssemblyReader.OPCODE].isEmpty()) {
                     continue;
                 }
 
                 int machinecode = 0;
                 int opcode;
 
-                switch (v[Main.OPCODE]) {
-                    case ".fill" -> machinecode = resolveValue(v[Main.ARG0]);
+                switch (v[AssemblyReader.OPCODE]) {
+                    case ".fill" -> machinecode = resolveValue(v[AssemblyReader.ARG0]);
                     case "add", "nand" -> {
-                        opcode = Objects.equals(v[Main.OPCODE], "add") ? 0 : 1;
-                        int arg0 = Integer.parseInt(v[Main.ARG0]);
-                        int arg1 = Integer.parseInt(v[Main.ARG1]);
-                        int arg2 = Integer.parseInt(v[Main.ARG2]);
+                        opcode = Objects.equals(v[AssemblyReader.OPCODE], "add") ? 0 : 1;
+                        int arg0 = Integer.parseInt(v[AssemblyReader.ARG0]);
+                        int arg1 = Integer.parseInt(v[AssemblyReader.ARG1]);
+                        int arg2 = Integer.parseInt(v[AssemblyReader.ARG2]);
                         machinecode = (opcode << 22) | (arg0 << 19) | (arg1 << 16) | arg2;
                     }
                     case "lw", "sw", "beq" -> {
-                        if (Objects.equals(v[Main.OPCODE], "lw")) opcode = 2;
-                        else if (Objects.equals(v[Main.OPCODE], "sw")) opcode = 3;
+                        if (Objects.equals(v[AssemblyReader.OPCODE], "lw")) opcode = 2;
+                        else if (Objects.equals(v[AssemblyReader.OPCODE], "sw")) opcode = 3;
                         else opcode = 4;
 
-                        int arg0 = Integer.parseInt(v[Main.ARG0]);
-                        int arg1 = Integer.parseInt(v[Main.ARG1]);
+                        int arg0 = Integer.parseInt(v[AssemblyReader.ARG0]);
+                        int arg1 = Integer.parseInt(v[AssemblyReader.ARG1]);
 
                         int offset;
                         if (opcode == 4) {
-                            offset = computeRelativeOffset(v[Main.ARG2], lineNo);
+                            offset = computeRelativeOffset(v[AssemblyReader.ARG2], lineNo);
                         } else {
-                            offset = resolveValue(v[Main.ARG2]);
+                            offset = resolveValue(v[AssemblyReader.ARG2]);
                         }
                         machinecode = (opcode << 22) | (arg0 << 19) | (arg1 << 16) | (offset & 0xFFFF);
                     }
                     case "jalr" -> {
                         opcode = 5;
-                        int arg0 = Integer.parseInt(v[Main.ARG0]);
-                        int arg1 = Integer.parseInt(v[Main.ARG1]);
+                        int arg0 = Integer.parseInt(v[AssemblyReader.ARG0]);
+                        int arg1 = Integer.parseInt(v[AssemblyReader.ARG1]);
                         machinecode = (opcode << 22) | (arg0 << 19) | (arg1 << 16);
                     }
                     case "halt", "noop" -> {
-                        opcode = Objects.equals(v[Main.OPCODE], "halt") ? 6 : 7;
+                        opcode = Objects.equals(v[AssemblyReader.OPCODE], "halt") ? 6 : 7;
                         machinecode = opcode << 22;
                     }
                 }

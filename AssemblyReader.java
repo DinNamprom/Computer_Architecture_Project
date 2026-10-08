@@ -1,9 +1,11 @@
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Scanner;
 import java.util.TreeMap;
 
-public class Main {
+public class AssemblyReader {
     static final int MAXLINELENGTH = 1000;
 
     // Indexes into the fields array filled by readAndParse
@@ -11,14 +13,16 @@ public class Main {
 
     static void main() {
 
-        String inFileString = "D:\\Com Arc\\Proj\\src\\main\\assembly-code-file";
-        String outFileString = "D:\\Com Arc\\Proj\\src\\main\\machine-code-file";
+
+        String inFileString = "assembly-code-file";
+        String outFileString = "machine-code-file";
+
 
         Assembler.AsmReader in = null;
         try {
             in = new Assembler.AsmReader(inFileString);
         } catch (IOException e) {
-            System.out.println("error in opening " + inFileString);
+            System.out.println("error in opening " + inFileString + ": " + e);
             System.exit(1);
         }
 
@@ -36,7 +40,7 @@ public class Main {
             System.exit(1);
         }
 
-       Assembler.ConvertMachineCode assembly_machine = new Assembler.ConvertMachineCode(assembly);
+        Assembler.ConvertMachineCode assembly_machine = new Assembler.ConvertMachineCode(assembly);
 
         // Pass 2: write output
         try (PrintWriter out = new PrintWriter(new FileWriter(outFileString))) {

@@ -1,3 +1,5 @@
+package ImmGenAndControlUnit;
+
 public class ALU {
     public static String getALUSignal (int opcode){
         switch (opcode){

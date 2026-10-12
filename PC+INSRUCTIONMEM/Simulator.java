@@ -32,6 +32,7 @@ public class Simulator {
 
     public static int simulate(StateType state) {
         int instructionCount = 0;
+        RegisterBridge registers = new RegisterBridge(state);
 
         while (true) {
             int currentPC = state.pc;
@@ -40,20 +41,14 @@ public class Simulator {
             }
 
             // แสดงสถานะก่อนรันแต่ละคำสั่ง
+            registers.readInto(state);
             printState(state);
-            int instruction = state.mem[currentPC];
-            int opcode = InstructionDecoder.getOpcode(instruction);
-
-            // beq และ jalr จะเปลี่ยน nextPC ตรงส่วน execute
-            int nextPC = currentPC + 1;
-            if (opcode != InstructionDecoder.HALT && opcode != InstructionDecoder.NOOP) {
-                throw new IllegalStateException(
-                        "Opcode " + opcode + " is not connected yet (pc " + currentPC + ").");
-            }
-
-            state.pc = nextPC;
+            // ControlUnit รันคำสั่งและอัปเดต PC เอง
+            boolean halted = ControlUnit.controlUnit(state);
+            registers.writeFrom(state);
+            registers.readInto(state);
             instructionCount++; // นับ noop และ halt ด้วย
-            if (opcode == InstructionDecoder.HALT) {
+            if (halted) {
                 return instructionCount;
             }
         }

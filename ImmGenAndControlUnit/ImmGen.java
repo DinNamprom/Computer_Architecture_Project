@@ -1,5 +1,3 @@
-package ImmGenAndControlUnit;
-
 public class ImmGen {
 
     // ดึง offsetField (bit 15-0) ออกจาก instruction 32-bit

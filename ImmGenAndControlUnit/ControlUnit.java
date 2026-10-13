@@ -19,32 +19,31 @@ public class ControlUnit
 
 
         switch (opcode) { //binary compare
-            case 0:  // add (R-type)
-                s.reg[destReg] = s.reg[regA] + s.reg[regB];
+            case 0:  // add
+            case 1:  // nand
+                s.reg[destReg] = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], s.reg[regB]);
                 s.pc++;
                 break;
-            case 1:  // nand (R-type)
-                s.reg[destReg] = ~(s.reg[regA] & s.reg[regB]);
+            case 2: { // lw
+                int addr = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], convertNum(instruction & 0xFFFF));
+                checkAddr(addr);
+                s.reg[regB] = s.mem[addr];
                 s.pc++;
                 break;
-            case 2:  // lw
-                int addrL = s.reg[regA] + ImmGen.convertNum(instruction & 0xFFFF);
-                checkAddr(addrL);
-                s.reg[regB] = s.mem[addrL];
+            }
+            case 3: { // sw
+                int addr = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], convertNum(instruction & 0xFFFF));
+                checkAddr(addr);
+                s.mem[addr] = s.reg[regB];
                 s.pc++;
                 break;
-            case 3:  // sw
-                int addrS = s.reg[regA] + ImmGen.convertNum(instruction & 0xFFFF);
-                checkAddr(addrS);
-                s.mem[addrS] = s.reg[regB];
-                s.pc++;
+            }
+            case 4: { // beq
+                int diff = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], s.reg[regB]);
+                if (diff == 0) s.pc = s.pc + 1 + convertNum(instruction & 0xFFFF);
+                else s.pc++;
                 break;
-            case 4:  // beq (I-type)
-                if (s.reg[regA] == s.reg[regB])
-                    s.pc = s.pc + 1 + ImmGen.convertNum(instruction & 0xFFFF);
-                else
-                    s.pc++;
-                break;
+            }
             case 5: { // jalr
                 int next = s.pc + 1;
                 int target = (regA == regB) ? next : s.reg[regA];

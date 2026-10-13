@@ -1,22 +1,14 @@
-package ImmGenAndControlUnit;
-
-
-import static ImmGenAndControlUnit.ImmGen.convertNum;
-import static ImmGenAndControlUnit.StateType.NUMMEMORY;
-
-
 public class ControlUnit
 {
     static void checkAddr(int addr) {
-        if (addr < 0 || addr >= NUMMEMORY) {
-            System.out.println("error: address out of range: " + addr);
-            System.exit(1);
+        if (addr < 0 || addr >= StateType.NUMMEMORY) {
+            throw new IllegalStateException("Address out of range: " + addr);
         }
     }
 
     // Control Unit: decode + execute 1 instruction
 // คืนค่า true ถ้าเป็น halt (ให้ผู้เรียกหยุด loop)
-    static boolean controlUnit(StateType s) {
+    public static boolean controlUnit(StateType s) {
         checkAddr(s.pc);
         int instruction    = s.mem[s.pc];
         int opcode  = (instruction >> 22) & 0x7;   // bits 24-22
@@ -66,8 +58,7 @@ public class ControlUnit
                 s.pc++;
                 break;
             default:
-                System.out.println("error: unknown opcode " + opcode);
-                System.exit(1);
+                throw new IllegalStateException("Unknown opcode: " + opcode);
         }
         s.reg[0] = 0;                       // $0 เป็น 0 เสมอ
         return false;

@@ -80,6 +80,39 @@ public class Assembler {
     static final Set<String> OPCODES = Set.of(
             "add", "nand", "lw", "sw", "beq", "jalr", "halt", "noop", ".fill");
 
+    static boolean validOperands(String[] f, int lineNo) {
+        String op = f[OPCODE];
+        if (op.equals(".fill")) {
+            if (f[ARG0].isEmpty()) {
+                System.out.println("error: line " + lineNo + ": missing operand");
+                return false;
+            }
+            return true;
+        }
+        int needed = switch (op) {
+            case "add", "nand", "lw", "sw", "beq" -> 3;
+            case "jalr" -> 2;
+            default -> 0;
+        };
+        String[] args = {f[ARG0], f[ARG1], f[ARG2]};
+        for (int i = 0; i < needed; i++) {
+            if (args[i].isEmpty()) {
+                System.out.println("error: line " + lineNo + ": missing operand");
+                return false;
+            }
+            boolean isRegister = i < 2 || op.equals("add") || op.equals("nand");
+            if (isRegister) {
+                if (!isNumber(args[i])
+                        || Integer.parseInt(args[i].trim()) < 0
+                        || Integer.parseInt(args[i].trim()) > 7) {
+                    System.out.println("error: line " + lineNo + ": invalid register " + args[i]);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
     static boolean ErrorChecker(Map<Integer, String[]> Assembly) {
         Collector c = new Collector(Assembly);
         if (!c.ok) {
@@ -96,6 +129,10 @@ public class Assembler {
             }
             if (!OPCODES.contains(op)) {
                 System.out.println("error: line " + lineNo + ": unrecognized opcode " + op);
+                return false;
+            }
+
+            if (!validOperands(f, lineNo)) {
                 return false;
             }
 
@@ -173,7 +210,7 @@ public class Assembler {
                 int opcode;
 
                 switch (v[OPCODE]) {
-                    case ".fill" -> machinecode = resolveValue(v[ARG0]);
+                    case ".fill" -> machinecode = resolveFill(v[ARG0]);
                     case "add", "nand" -> {
                         opcode = Objects.equals(v[OPCODE], "add") ? 0 : 1;
                         int arg0 = Integer.parseInt(v[ARG0]);
@@ -229,6 +266,18 @@ public class Assembler {
                 exit(1);
             }
             return target - (currentAddr + 1);
+        }
+
+        int resolveFill(String arg0) {
+            if (isNumber(arg0)) {
+                return Integer.parseInt(arg0.trim());
+            }
+            Integer target = addressOf.get(arg0);
+            if (target == null) {
+                System.out.println("error: undefined label " + arg0);
+                exit(1);
+            }
+            return target;
         }
 
         int resolveValue(String arg0) {

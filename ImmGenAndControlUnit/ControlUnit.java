@@ -1,89 +1,100 @@
 package ImmGenAndControlUnit;
 
+public class ControlUnit {
 
-import static ImmGenAndControlUnit.ImmGen.convertNum;
-import static ImmGenAndControlUnit.StateType.NUMMEMORY;
+    public static int decodeInstruction(int instruction) {
+        //(Opcode 3 บิต อยู่ที่บิต 24-22)
+        int opcode = (instruction >> 22) & 0x7;
+        return opcode;
+    }
 
+    // 1. RegWrite: เป็น 1 เมื่อเป็นคำสั่ง add (0), nand (1), lw (2), jalr (5)
+    public static int getRegWrite(int opcode) {
+        if (opcode == 0b000 || opcode == 0b001 || opcode == 0b010 || opcode == 0b101) {
+            return 1;
+        }
+        return 0;
+    }
 
-public class ControlUnit
-{
-    static void checkAddr(int addr) {
-        if (addr < 0 || addr >= NUMMEMORY) {
-            System.out.println("error: address out of range: " + addr);
-            System.exit(1);
+    // 2. RegDst: เป็น 1 (rt) เมื่อเป็นคำสั่ง lw (2), jalr (5) | นอกนั้น (0 หรือ X) คืนค่า 0
+    public static int getRegDst(int opcode) {
+        if (opcode == 0b010 || opcode == 0b101) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // 3. ALUSrc: เป็น 1 (imm) เมื่อเป็นคำสั่ง lw (2), sw (3) | นอกนั้น (0 หรือ X) คืนค่า 0
+    public static int getALUSrc(int opcode) {
+        if (opcode == 0b010 || opcode == 0b011) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // 4. ALUOp: คืนค่าเป็น String ตามชนิดของการคำนวณ
+    public static String getALUOp(int opcode) {
+        switch (opcode) {
+            case 0b000: // add
+            case 0b010: // lw
+            case 0b011: // sw
+                return "add";
+            case 0b001: // nand
+                return "nand";
+            case 0b100: // beq
+                return "beq";
+            default:    // jalr, halt, noop
+                return "NONE";
         }
     }
 
-    // Control Unit: decode + execute 1 instruction
-// คืนค่า true ถ้าเป็น halt (ให้ผู้เรียกหยุด loop)
-    static boolean controlUnit(StateType s) {
-        checkAddr(s.pc);
-        int instruction    = s.mem[s.pc];
-        int opcode  = (instruction >> 22) & 0x7;   // bits 24-22
-        int regA    = (instruction >> 19) & 0x7;   // bits 21-19
-        int regB    = (instruction >> 16) & 0x7;   // bits 18-16
-        int destReg = instruction & 0x7;           // bits 2-0 (เฉพาะ R-type)
-
-
-
-        switch (opcode) { //binary compare
-            case 0:  // add
-            case 1:  // nand
-                s.reg[destReg] = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], s.reg[regB]);
-                s.pc++;
-                break;
-            case 2: { // lw
-                int addr = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], convertNum(instruction & 0xFFFF));
-                checkAddr(addr);
-                s.reg[regB] = s.mem[addr];
-                s.pc++;
-                break;
-            }
-            case 3: { // sw
-                int addr = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], convertNum(instruction & 0xFFFF));
-                checkAddr(addr);
-                s.mem[addr] = s.reg[regB];
-                s.pc++;
-                break;
-            }
-            case 4: { // beq
-                int diff = ALU.compute(ALU.getALUSignal(opcode), s.reg[regA], s.reg[regB]);
-                if (diff == 0) s.pc = s.pc + 1 + convertNum(instruction & 0xFFFF);
-                else s.pc++;
-                break;
-            }
-            case 5: { // jalr
-                int next = s.pc + 1;
-                int target = (regA == regB) ? next : s.reg[regA];
-                s.reg[regB] = next;
-                s.pc = target;
-                break;
-            }
-            case 6:  // halt (O-type)
-                s.pc++;
-                return true;
-            case 7:  // noop (O-type)
-                s.pc++;
-                break;
-            default:
-                System.out.println("error: unknown opcode " + opcode);
-                System.exit(1);
+    // 5. MemRead: เป็น 1 เฉพาะคำสั่ง lw (2)
+    public static int getMemRead(int opcode) {
+        if (opcode == 0b010) {
+            return 1;
         }
-        s.reg[0] = 0;                       // $0 เป็น 0 เสมอ
-        return false;
+        return 0;
+    }
+
+    // 6. MemWrite: เป็น 1 เฉพาะคำสั่ง sw (3)
+    public static int getMemWrite(int opcode) {
+        if (opcode == 0b011) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // 7. MemToReg: lw (2) คืนค่า 1 (Mem), jalr (5) คืนค่า 2 (PC+1) | นอกนั้นคืนค่า 0 (ALU หรือ X)
+    public static int getMemToReg(int opcode) {
+        if (opcode == 0b010) {
+            return 1;
+        } else if (opcode == 0b101) {
+            return 2;
+        }
+        return 0;
+    }
+
+    // 8. Branch: เป็น 1 เฉพาะคำสั่ง beq (4)
+    public static int getBranch(int opcode) {
+        if (opcode == 0b100) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // 9. Jalr: เป็น 1 เฉพาะคำสั่ง jalr (5)
+    public static int getJalr(int opcode) {
+        if (opcode == 0b101) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // 10. Halt: เป็น 1 เฉพาะคำสั่ง halt (6)
+    public static int getHalt(int opcode) {
+        if (opcode == 0b110) {
+            return 1;
+        }
+        return 0;
     }
 }
-
-//static void run(StateType s) {
-//    int count = 0;
-//    boolean halted = false;
-//    while (!halted) {
-//        printState(s);                  // ก่อน execute ทุก instruction
-//        halted = controlUnit(s);
-//        count++;
-//    }
-//    System.out.println("machine halted");
-//    System.out.println("total of " + count + " instructions executed");
-//    System.out.println("final state of machine:");
-//    printState(s);                      // ก่อน exit
-//}

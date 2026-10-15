@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Computer_Architecture_Project.iml" filepath="$PROJECT_DIR$/.idea/Computer_Architecture_Project.iml" />
-      <module fileurl="file://$PROJECT_DIR$/RegAndMem/RegAndMem.iml" filepath="$PROJECT_DIR$/RegAndMem/RegAndMem.iml" />
-    </modules>
-  </component>
-</project>

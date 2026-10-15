@@ -1,3 +1,5 @@
+package ImmGenAndControlUnit;
+
 public class ImmGen {
 
     // ดึง offsetField (bit 15-0) ออกจาก instruction 32-bit
@@ -14,7 +16,7 @@ public class ImmGen {
     }
 
     // IMM Generator
-    static int immGen(int instruction) {
+    public static int immGen(int instruction) {
         return convertNum(getOffsetField(instruction));
     }
 

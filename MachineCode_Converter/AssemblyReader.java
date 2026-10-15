@@ -1,3 +1,5 @@
+package MachineCode_Converter;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -7,8 +9,8 @@ public class AssemblyReader {
     static void main() {
 
 
-        String inFileString = "MachineCode_Converter/assembly-code-file";
-        String outFileString = "MachineCode_Converter/machine-code-file";
+        String inFileString = "assembly/factorial.as";
+        String outFileString = "PCAndINSRUCTIONMEM/machine-code-file";
 
 
         Assembler.AsmReader in = null;

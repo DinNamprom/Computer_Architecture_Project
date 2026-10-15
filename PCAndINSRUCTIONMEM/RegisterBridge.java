@@ -1,7 +1,9 @@
+package PCAndINSRUCTIONMEM;
+
 import RegAndMem.Reg;
 
 public final class RegisterBridge {
-    private final Reg registers = new Reg(BitConverter::fromBits32);
+    private Reg registers = new Reg(BitConverter::fromBits32);
 
     public RegisterBridge(StateType state) {
         writeFrom(state);
@@ -20,5 +22,13 @@ public final class RegisterBridge {
         for (int i = 1; i < StateType.NUMREGS; i++) {
             registers.set(i, state.reg[i]);
         }
+    }
+
+    public void setRegisters(Reg registers) {
+        this.registers = registers;
+    }
+
+    public Reg getRegister() {
+        return registers;
     }
 }

@@ -1,3 +1,5 @@
+package PCAndINSRUCTIONMEM;
+
 public class StateType {
     public static final int NUMMEMORY = 65536;
     public static final int NUMREGS = 8;

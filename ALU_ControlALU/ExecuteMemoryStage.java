@@ -15,6 +15,9 @@ public class ExecuteMemoryStage{
         this.dataMem = dataMem;
     }
 
+    public Reg getReg() {return reg;}
+    public DataMem getdataMem() {return dataMem;}
+
     /**
         use for case bit MSB(bit 32) < 0
         during using math.pow it sudden cut off 1

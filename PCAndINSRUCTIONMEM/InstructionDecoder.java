@@ -1,3 +1,5 @@
+package PCAndINSRUCTIONMEM;
+
 public final class InstructionDecoder {
     public static final int HALT = 6;
     public static final int NOOP = 7;

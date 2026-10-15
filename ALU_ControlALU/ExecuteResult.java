@@ -1,4 +1,4 @@
-package ALUpart;
+package ALU_ControlALU;
 
 public class ExecuteResult {
     public final int aluResult;

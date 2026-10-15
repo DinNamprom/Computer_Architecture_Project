@@ -54,11 +54,11 @@ public class DataMem {
         return binary2decimal(data);
     }
     private int binary2decimal(boolean[] data) {
-        int sum = 0;
-        for (int i = 0;i < data.length;i++) {
-            if (data[i]) sum += (int) Math.pow(2, data.length-1-i);
+        int value = 0;
+        for (boolean bit : data) {
+            value = (value << 1) | (bit ? 1 : 0);
         }
-        return sum;
+        return value;
     }
 
     private boolean[] decimal2binary(int decimal) {

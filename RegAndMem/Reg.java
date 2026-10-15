@@ -1,18 +1,9 @@
 package RegAndMem;
 
-import java.util.function.ToIntFunction;
-
 public class Reg {
     private OneByteMem[][] data;
     private final int size = 8;
-    private final ToIntFunction<boolean[]> decoder;
     public Reg() {
-        this(Reg::binary2decimal);
-    }
-
-    // ให้ตัวเชื่อมเลือกวิธีแปลงบิต โดยใช้ register ชุดเดิม
-    public Reg(ToIntFunction<boolean[]> decoder) {
-        this.decoder = java.util.Objects.requireNonNull(decoder);
         data = new OneByteMem[size][4];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < 4; j++) data[i][j] = new OneByteMem();
@@ -29,7 +20,7 @@ public class Reg {
             Latch[] latches = data[address][i].get();
             for (int j = 0; j < 8; j++) output[i*8 + j] = latches[j].get();
         }
-        return decoder.applyAsInt(output);
+        return binary2decimal(output);
     }
 
     public void set(int address, int value) {
@@ -46,17 +37,17 @@ public class Reg {
         for (int i = 0; i < b_value.length; i++) s_data[31 - i] = b_value[b_value.length - i - 1];
         for (int i = 0; i < 4; i++) {
             boolean[] byteChunk = new boolean[8];
-            System.arraycopy(s_data, (i * 8), byteChunk, 0, 8);
+            System.arraycopy(s_data, (i *8), byteChunk, 0, 8);
             data[address][i].set(byteChunk, true);
         }
     }
 
-    private static int binary2decimal(boolean[] data) {
-        int sum = 0;
-        for (int i = 0;i < data.length;i++) {
-            if (data[i]) sum += (int) Math.pow(2, data.length-1-i);
+    private int binary2decimal(boolean[] data) {
+        int value = 0;
+        for (boolean bit : data) {
+            value = (value << 1) | (bit ? 1 : 0);
         }
-        return sum;
+        return value;
     }
 
     private boolean[] decial2binary(int data) {
@@ -67,6 +58,4 @@ public class Reg {
         }
         return output;
     }
-
-
 }

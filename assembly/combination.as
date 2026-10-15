@@ -36,4 +36,10 @@ comb    beq     2       0       base    C(n,0) = 1
         jalr    7       4               return
 base    lw      0       3       one     base result
         jalr    7       4               return
+n       .fill   7
+r       .fill   3
+one     .fill   1
+neg1    .fill   -1
+caddr   .fill   comb
+stack   .fill   0
 

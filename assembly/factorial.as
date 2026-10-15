@@ -2,6 +2,7 @@ floop   lw      0       3       mplier         # $3 = mplier = n
         lw      0       1       pos1
         beq     3       0       done            # n == 0 -> finished (0! = 1)
         beq     3       1       done            # n == 1 -> finished
+        add     0       0       1       # reset product to 0 before each multiplication
         lw      0       2       res     $2 = res = mcand (shift left ทุกรอบ) --Multiply starts here
         lw      0       4       pos1    $4 = mask = 1
         lw      0       6       lim     $6 = 32768 (ค่าที่ใช้เช็คว่า mask ครบ 15 bits)
@@ -11,7 +12,7 @@ loop    nand    3       4       5       $5 = NAND(mplier, mask)
         add     1       2       1       product ($1) += mcand
         add     2       2       2       mcand = mcand * 2 (shift left)
         add     4       4       4       mask = mask * 2 (shift left)
-        beq     4       6       1       ถ้า mask == 32768 กระโดดไป halt
+        beq     4       6       1       ถ้า mask == 32768 ข้ามการวนกลับ ไปเก็บผลคูณ
         beq     0       0       loop    ยังไม่ครบ วนกลับ --Multiply done, store result and decrement mplier
         sw      0       1       res     # store result
         lw      0       3       mplier  # load mplier

@@ -10,7 +10,7 @@ public class AssemblyReader {
 
 
         String inFileString = "assembly/factorial.as";
-        String outFileString = "PCAndINSRUCTIONMEM/machine-code-file";
+        String outFileString = "machine_code/machine_code_file.txt";
 
 
         Assembler.AsmReader in = null;

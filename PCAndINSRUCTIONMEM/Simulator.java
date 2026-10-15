@@ -21,7 +21,7 @@ public class Simulator {
 
         try {
             // รับ path จาก args หรือใช้ชื่อไฟล์เดิม
-            Path path = Path.of(args.length == 1 ? args[0] : "machine_code.txt");
+            Path path = Path.of(args.length == 1 ? args[0] : "machine_code/machine_code_file.txt");
             StateType state = new StateType();
             MachineCodeLoader.load(path, state);
             int instructionCount = simulate(state);

@@ -3,7 +3,7 @@ package PCAndINSRUCTIONMEM;
 import RegAndMem.Reg;
 
 public final class RegisterBridge {
-    private Reg registers = new Reg(BitConverter::fromBits32);
+    private Reg registers = new Reg();
 
     public RegisterBridge(StateType state) {
         writeFrom(state);

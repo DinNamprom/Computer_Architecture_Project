@@ -24,7 +24,7 @@ public class ExecuteMemoryStage{
         that's why we need to add it back one for fixes bug
      */
     public int signed(int rawValue){
-        if( rawValue < 0 ) return rawValue + 1;
+        if( rawValue < 0 ) return rawValue;
         else return rawValue;
     }
 
@@ -74,10 +74,10 @@ public class ExecuteMemoryStage{
          */
         int memData = 0;
         if(memRead == 1){
-            int rawMemData = dataMem.load(aluResult);
-            memData = signed(dataMem.load(aluResult));     // lw -- load data from aluResult address to store in memData
+            int rawMemData = dataMem.load(aluResult*4);
+            memData = signed(dataMem.load(aluResult*4));     // lw -- load data from aluResult address to store in memData
         }
-        if(memWrite == 1)dataMem.store(aluResult, rs2, true);       // sw -- get value in rs2 store in the aluResult address
+        if(memWrite == 1)dataMem.store(aluResult*4, rs2, true);       // sw -- get value in rs2 store in the aluResult address
 
         // instead of checking from opcode use memWrite and memRead
 //        if(opcode == 2){
